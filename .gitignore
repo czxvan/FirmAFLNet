@@ -33,3 +33,8 @@ qemu_mode*/qemu-*/
 afl-qemu-trace
 afl-spy-logs/
 *.log
+
+# QEMU build
+qemu_mode/*/GNUmakefile
+qemu_mode/*/build/
+__pycache__/
