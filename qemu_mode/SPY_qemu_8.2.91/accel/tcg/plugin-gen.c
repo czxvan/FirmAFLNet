@@ -973,8 +973,8 @@ void HELPER(tb_exec_spy)(CPUArchState *env)
 {
     CPUState *cpu = env_cpu(env);
     g_autofree TBInfo *data = g_new0(TBInfo, 1);
-    data->ctx = env->cp15.ttbr0_el[3];
-    data->pc = env->regs[15];
+    data->ctx = SPY_getPGD(env);
+    data->pc = SPY_getPC(env);
     
     qemu_plugin_tb_exec_spy_cb(cpu, env, data);
 }
@@ -984,9 +984,17 @@ void plugin_gen_insn_trans_spy(CPUState *cpu, const DisasContextBase *db)
     CPUArchState *env = cpu_env(cpu);
     uint32_t insn = cpu_ldl_code(env, db->pc_next);
     qemu_plugin_insn_trans_cb(cpu, env, insn);
-    if (insn == 0xef000000) {
+#ifdef TARGET_ARM
+    if (insn == 0xef000000)
+#elif defined(TARGET_MIPS)
+    if (insn == 0x0000000c || insn == 0x0c000000)
+#else
+    if (0)
+#endif
+    {
         gen_helper_syscall_spy(tcg_env);
     }
+
 }
 
 QEMU_DISABLE_CFI
@@ -994,112 +1002,112 @@ void HELPER(syscall_spy)(CPUArchState *env)
 {
     CPUState *cpu = env_cpu(env);
     g_autofree SyscallInfo *data = g_new0(SyscallInfo, 1);
-    data->num = env->regs[7];
-    data->ctx = env->cp15.ttbr0_el[3];
-    switch (env->regs[7]) {
+    data->num = SPY_getSyscallNum(env);
+    data->ctx = SPY_getPGD(env);
+    switch (data->num) {
         case EXIT: {
             ExitParams *exit_params = g_new0(ExitParams, 1);
-            exit_params->error_code = env->regs[0];
+            exit_params->error_code = SPY_getSyscallArg(env, 0);
             data->params.exit_params = exit_params;
         } break;
         case READ: {
             ReadParams *read_params = g_new0(ReadParams, 1);
-            read_params->fd = env->regs[0];
-            // read_params->buf = guest_strdup(cpu, env->regs[1]);
+            read_params->fd = SPY_getSyscallArg(env, 0);
+            // read_params->buf = guest_strdup(cpu, SPY_getSyscallArg(env, 1));
             read_params->buf = NULL;
-            read_params->count = env->regs[1];
+            read_params->count = SPY_getSyscallArg(env, 1);
             data->params.read_params = read_params;
         } break;
         case WRITE: {
             WriteParams *write_params = g_new0(WriteParams, 1);
-            write_params->fd = env->regs[0];
-            write_params->buf = guest_strdupl(cpu, env->regs[1], env->regs[2]);
-            write_params->count = env->regs[2];
+            write_params->fd = SPY_getSyscallArg(env, 0);
+            write_params->buf = guest_strdupl(cpu, SPY_getSyscallArg(env, 1), SPY_getSyscallArg(env, 2));
+            write_params->count = SPY_getSyscallArg(env, 2);
             data->params.write_params = write_params;
         } break;
         case OPEN: {
             OpenParams *open_params = g_new0(OpenParams, 1);
-            open_params->filename = guest_strdup(cpu, env->regs[0]);
+            open_params->filename = guest_strdup(cpu, SPY_getSyscallArg(env, 0));
             data->params.open_params = open_params;
         } break;
         case CLOSE: {
             CloseParams *close_params = g_new0(CloseParams, 1);
-            close_params->fd =env->regs[0];
+            close_params->fd =SPY_getSyscallArg(env, 0);
             data->params.close_params = close_params;
         } break;
         case EXECVE: {
             ExecveParams *execve_params = g_new0(ExecveParams, 1);
-            execve_params->filename = guest_strdup(cpu, env->regs[0]);
+            execve_params->filename = guest_strdup(cpu, SPY_getSyscallArg(env, 0));
             data->params.execve_params = execve_params;
         } break;
         case SEND: {
             SendParams *send_params = g_new0(SendParams, 1);
-            send_params->sockfd = env->regs[0];
-            send_params->buf = guest_strdupl(cpu, env->regs[1], env->regs[2]);
-            send_params->len = env->regs[2];
-            send_params->flags = env->regs[3];
+            send_params->sockfd = SPY_getSyscallArg(env, 0);
+            send_params->buf = guest_strdupl(cpu, SPY_getSyscallArg(env, 1), SPY_getSyscallArg(env, 2));
+            send_params->len = SPY_getSyscallArg(env, 2);
+            send_params->flags = SPY_getSyscallArg(env, 3);
             data->params.send_params = send_params;
         } break;
         case SENDTO: {
             SendtoParams *sendto_params = g_new0(SendtoParams, 1);
-            sendto_params->sockfd = env->regs[0];
-            sendto_params->buf = guest_strdupl(cpu, env->regs[1], env->regs[2]);
-            sendto_params->len = env->regs[2];
-            sendto_params->flags = env->regs[3];
-            sendto_params->dest_addr = env->regs[4];
-            sendto_params->dest_len = env->regs[5];
+            sendto_params->sockfd = SPY_getSyscallArg(env, 0);
+            sendto_params->buf = guest_strdupl(cpu, SPY_getSyscallArg(env, 1), SPY_getSyscallArg(env, 2));
+            sendto_params->len = SPY_getSyscallArg(env, 2);
+            sendto_params->flags = SPY_getSyscallArg(env, 3);
+            sendto_params->dest_addr = SPY_getSyscallArg(env, 4);
+            sendto_params->dest_len = SPY_getSyscallArg(env, 5);
             data->params.sendto_params = sendto_params;
         } break;
         case SENDMSG: {
             SendmsgParams *sendmsg_params = g_new0(SendmsgParams, 1);
-            sendmsg_params->sockfd = env->regs[0];
+            sendmsg_params->sockfd = SPY_getSyscallArg(env, 0);
             sendmsg_params->msg = NULL;
-            sendmsg_params->flags = env->regs[2];
+            sendmsg_params->flags = SPY_getSyscallArg(env, 2);
             data->params.sendmsg_params = sendmsg_params;
         } break;
         case RECV: {
             RecvParams *recv_params = g_new0(RecvParams, 1);
-            recv_params->sockfd = env->regs[0];
+            recv_params->sockfd = SPY_getSyscallArg(env, 0);
             recv_params->buf = NULL;
-            recv_params->len = env->regs[2];
-            recv_params->flags = env->regs[3];
+            recv_params->len = SPY_getSyscallArg(env, 2);
+            recv_params->flags = SPY_getSyscallArg(env, 3);
             data->params.recv_params = recv_params;
         } break;
         case RECVFROM: {
             RecvfromParams *recvfrom_params = g_new0(RecvfromParams, 1);
-            recvfrom_params->sockfd = env->regs[0];
+            recvfrom_params->sockfd = SPY_getSyscallArg(env, 0);
             recvfrom_params->buf = NULL;
-            recvfrom_params->len = env->regs[2];
-            recvfrom_params->flags = env->regs[3];
-            recvfrom_params->src_addr = env->regs[4];
-            recvfrom_params->src_len = env->regs[5];
+            recvfrom_params->len = SPY_getSyscallArg(env, 2);
+            recvfrom_params->flags = SPY_getSyscallArg(env, 3);
+            recvfrom_params->src_addr = SPY_getSyscallArg(env, 4);
+            recvfrom_params->src_len = SPY_getSyscallArg(env, 5);
             data->params.recvfrom_params = recvfrom_params;
         } break;
         case SOCKET: {
             SocketParams *socket_params = g_new0(SocketParams, 1);
-            socket_params->domain = env->regs[0];
-            socket_params->type = env->regs[1];
-            socket_params->protocol = env->regs[2];
+            socket_params->domain = SPY_getSyscallArg(env, 0);
+            socket_params->type = SPY_getSyscallArg(env, 1);
+            socket_params->protocol = SPY_getSyscallArg(env, 2);
             data->params.socket_params = socket_params;
         } break;
         case BIND: {
             BindParams *bind_params = g_new0(BindParams, 1);
-            bind_params->sockfd = env->regs[0];
-            bind_params->sock_addr = env->regs[1];
-            bind_params->addr_len = env->regs[2];
+            bind_params->sockfd = SPY_getSyscallArg(env, 0);
+            bind_params->sock_addr = SPY_getSyscallArg(env, 1);
+            bind_params->addr_len = SPY_getSyscallArg(env, 2);
             data->params.bind_params = bind_params;
         } break;
         case LISTEN: {
             ListenParams *listen_params = g_new0(ListenParams, 1);
-            listen_params->sockfd = env->regs[0];
-            listen_params->backlog = env->regs[1];
+            listen_params->sockfd = SPY_getSyscallArg(env, 0);
+            listen_params->backlog = SPY_getSyscallArg(env, 1);
             data->params.listen_params = listen_params;
         } break;
         case ACCEPT: {
             AcceptParams *accept_params = g_new0(AcceptParams, 1);
-            accept_params->sockfd = env->regs[0];
-            accept_params->sock_addr = env->regs[1];
-            accept_params->addr_len = env->regs[2];
+            accept_params->sockfd = SPY_getSyscallArg(env, 0);
+            accept_params->sock_addr = SPY_getSyscallArg(env, 1);
+            accept_params->addr_len = SPY_getSyscallArg(env, 2);
             data->params.accept_params = accept_params;
         } break;
         
@@ -1111,7 +1119,7 @@ void plugin_gen_tlb_set_spy(CPUState* cpu, vaddr addr, hwaddr paddr, int prot, i
 {
     CPUArchState *env = cpu_env(cpu);
     g_autofree TLBInfo* data = g_new0(TLBInfo, 1);
-    data->ctx = env->cp15.ttbr0_el[3];
+    data->ctx = SPY_getPGD(env);
     data->addr = addr;
     data->paddr = paddr;
     data->prot = prot;
@@ -1124,7 +1132,7 @@ void plugin_gen_exception_spy(CPUState *cpu, uint32_t excp,
 {
     CPUArchState *env = cpu_env(cpu);
     g_autofree ExceptionInfo *data = g_new0(ExceptionInfo, 1);
-    data->ctx = env->cp15.ttbr0_el[3];
+    data->ctx = SPY_getPGD(env);
     data->excp = excp;
     data->syndrome = syndrome;
     data->target_el = target_el;

@@ -1383,4 +1383,25 @@ static inline void cpu_get_tb_cpu_state(CPUMIPSState *env, vaddr *pc,
  */
 MIPSCPU *mips_cpu_create_with_clock(const char *cpu_type, Clock *cpu_refclk);
 
+
+static inline target_ulong SPY_getPC(CPUArchState *env)
+{
+    return (env->active_tc.PC);
+}
+
+static inline target_ulong SPY_getPGD(CPUArchState *env)
+{
+    return env->CP0_EntryHi;
+}
+
+static inline target_ulong SPY_getSyscallNum(CPUArchState *env)
+{
+    return env->active_tc.gpr[2];
+}
+
+static inline target_ulong SPY_getSyscallArg(CPUArchState *env, int n)
+{
+    return env->active_tc.gpr[n+4];
+}
+
 #endif /* MIPS_CPU_H */

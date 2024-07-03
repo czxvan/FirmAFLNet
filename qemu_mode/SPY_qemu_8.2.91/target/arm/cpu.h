@@ -3281,4 +3281,25 @@ static inline target_ulong cpu_untagged_addr(CPUState *cs, target_ulong x)
 }
 #endif
 
+static inline target_ulong SPY_getPC(CPUArchState *env)
+{
+    return (env->regs[15]);
+}
+
+static inline target_ulong SPY_getPGD(CPUArchState *env)
+{
+    // return env->cp15.ttbr0_el[1]; // I think it's wrong, but firmafl use it.
+    return env->cp15.ttbr0_el[3];
+}
+
+static inline target_ulong SPY_getSyscallNum(CPUArchState *env)
+{
+    return env->regs[7];
+}
+
+static inline target_ulong SPY_getSyscallArg(CPUArchState *env, int n)
+{
+    return env->regs[n];
+}
+
 #endif

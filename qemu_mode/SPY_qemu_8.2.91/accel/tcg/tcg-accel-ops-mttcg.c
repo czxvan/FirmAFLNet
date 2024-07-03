@@ -194,16 +194,23 @@ void dump_CPUState(CPUState *cpu) {
     fprintf(log, "\tprctl_unalign_sigbus = %d\n", cpu->prctl_unalign_sigbus);
     qemu_log_unlock(log);
 
-    CPUArchState *env = cpu_env(cpu);
     FILE *logfile = qemu_log_trylock();
     if(logfile) {
         cpu_dump_state(cpu, logfile, CPU_DUMP_CODE | CPU_DUMP_VPU);
-        fprintf(logfile, "pgdir = %08x %08x %08x %08x\n"
+#ifdef TARGET_ARM
+        CPUArchState *env = cpu_env(cpu);
+        fprintf(logfile, "arm pgdir = %08x %08x %08x %08x\n"
                 , (uint32_t)env->cp15.ttbr0_el[1]
                 , (uint32_t)env->cp15.ttbr0_el[3]
                 , (uint32_t)env->cp15.ttbr1_el[1]
                 , (uint32_t)env->cp15.ttbr1_el[3]
                 );
+#elif defined(TARGET_MIPS)
+        CPUArchState *env = cpu_env(cpu);
+        fprintf(logfile, "mips pgdir = %08x\n"
+                , (uint32_t)env->CP0_EntryHi
+                );
+#endif
         fprintf(logfile, "--------------------------------\n");
         qemu_log_unlock(logfile);
     }
