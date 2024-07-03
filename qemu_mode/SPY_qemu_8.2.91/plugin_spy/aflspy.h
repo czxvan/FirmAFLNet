@@ -1,3 +1,4 @@
+#ifdef SPY_TARGET_ARM
 #define EXIT    1
 #define FORK    2
 #define READ    3
@@ -17,6 +18,27 @@
 #define SENDMSG 296
 #define RECV    291
 #define RECVFROM    292
+#elif defined(SPY_TARGET_MIPS)
+#define EXIT    0xfa1
+#define FORK    0xfa2
+#define READ    0xfa3
+#define WRITE   0xfa4
+#define OPEN    0xfa5
+#define CLOSE   0xfa6
+#define EXECVE  0xfab
+#define CLONE   0x1018
+
+#define SOCKET  0x1057
+#define BIND    0x1049
+#define LISTEN  0x104e
+#define ACCEPT  0x1048
+
+#define SEND    0x1052
+#define SENDTO  0x1054
+#define SENDMSG 0x1053
+#define RECV    0x104f
+#define RECVFROM    0x1050
+#endif
 
 #define CTL_READ_FD 198
 #define STATE_WRITE_FD 199
@@ -311,7 +333,7 @@ static inline int is_trace_enabled(void) {
 }
 
 static inline int is_afl_spying(void) {
-    return spy_signal;
+    return (int)spy_signal;
 }
 
 static inline int is_nextstep_zero() {

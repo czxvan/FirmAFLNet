@@ -33,6 +33,19 @@ test: $(test_targets)
 	@$(CC) $(CFLAGS) -shared -o build/lib$@.so build/$^
 	@echo "${<}-->lib${@}.so"
 
+aflspy-arm:
+	[ ! -d "build" ] && mkdir build || true
+	@$(CC) $(CFLAGS) $(PLUGIN_CFLAGS) -DSPY_TARGET_ARM -c -o build/aflspy-arm.o aflspy.c
+	@$(CC) $(CFLAGS) -shared -o build/lib$@.so build/aflspy-arm.o
+	@echo "aflspy.c-->lib${@}.so"
+
+aflspy-mips:
+	[ ! -d "build" ] && mkdir build || true
+	@$(CC) $(CFLAGS) $(PLUGIN_CFLAGS) -DSPY_TARGET_MIPS -c -o build/aflspy-mips.o aflspy.c
+	@$(CC) $(CFLAGS) -shared -o build/lib$@.so build/aflspy-mips.o
+	@echo "aflspy.c-->lib${@}.so"
+
+
 run: aflspy
 	cd test/ && bash start-qemu-user.sh && cd ..
 
@@ -41,6 +54,8 @@ runsys: aflspy
 
 clean:
 	rm -f build/*
+
+all: aflspy-arm aflspy-mips
 
 .PHONY: all clean test $(test_targets)
 .SECONDARY:

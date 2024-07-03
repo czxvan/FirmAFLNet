@@ -37,4 +37,5 @@ afl-spy-logs/
 # QEMU build
 qemu_mode/*/GNUmakefile
 qemu_mode/*/build/
+qemu_mode/*/*/build/
 __pycache__/
