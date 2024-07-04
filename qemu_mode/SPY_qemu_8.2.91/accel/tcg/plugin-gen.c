@@ -52,6 +52,11 @@
 #include "exec/plugin-gen.h"
 #include "exec/translator.h"
 #include "exec/helper-proto-common.h"
+#ifdef TARGET_ARM
+#define SPY_TARGET_ARM
+#elif defined(TARGET_MIPS)
+#define SPY_TARGET_ARM
+#endif
 #include "plugin_spy/aflspy.h"
 #include "qemu/log.h"
 
