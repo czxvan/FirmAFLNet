@@ -1,4 +1,4 @@
-SRC_PATH=/home/czx/qemu-workspace/qemu-spy/plugin_spy
+SRC_PATH=$(PWD)
 TOP_SRC_PATH = $(SRC_PATH)/..
 PKG_CONFIG=pkg-config
 CC=cc -m64 -mcx16
