@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 set -u
 
@@ -143,7 +142,11 @@ echo "----Unmounting QEMU Image----"
 sync
 echo "${DEVICE}"
 echo "${IMAGE}"
-umount "${DEVICE}"
-kpartx -d "${IMAGE}"
-losetup -d "${DEVICE}" &>/dev/null
-dmsetup remove $(basename "$DEVICE") &>/dev/null
+if ! umount "${DEVICE}"; then
+    echo "Failed to unmount ${DEVICE}"
+fi
+
+LOOP=$(basename $(echo "$DEVICE" | sed 's/\([^0-9]*[0-9]*\).*/\1/'))
+echo "$LOOP"
+kpartx -vd "/dev/${LOOP}"
+losetup -vd "/dev/${LOOP}"
