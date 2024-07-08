@@ -12,6 +12,10 @@ os.system(cmd)
 sys_run_src = "firmadyne/scratch/%s/run_full.sh" %(firm_id)
 
 sys_src = "qemu_mode/SPY_qemu_8.2.91/build/qemu-system-%s" %(firm_arch)
+if 'mips' in firm_arch:
+	plugin_src = "qemu_mode/SPY_qemu_8.2.91/plugin_spy/build/libaflspy-mips.so"
+else:
+	plugin_src = "qemu_mode/SPY_qemu_8.2.91/plugin_spy/build/libaflspy-arm.so"
 config_src = "FirmAFLNet_config/%s/FirmAFLNet_config" %(firm_id)
 keywords_src = "FirmAFLNet_config/%s/keywords" %(firm_id)
 afl_src= "FirmAFLNet_config/afl-fuzz-full"
@@ -33,6 +37,7 @@ dst_input = "image_%s/inputs/" %firm_id
 cmd = []
 cmd.append("cp %s %s" %(sys_run_src, dst)) 
 cmd.append("cp %s %s" %(sys_src, dst)) 
+cmd.append("cp %s %s" % (plugin_src, dst))
 cmd.append("cp %s %s" %(config_src, dst)) 
 cmd.append("cp %s %s" %(keywords_src, dst)) 
 cmd.append("cp %s %s" %(afl_src, dst)) 
