@@ -5,21 +5,14 @@ firm_id = sys.argv[1]
 firm_arch = sys.argv[2]
 firm_dir = "image"+firm_id
 
-os.system("echo core >/proc/sys/kernel/core_pattern")
-os.system("cd /sys/devices/system/cpu\necho performance | tee cpu*/cpufreq/scaling_governor\ncd -")
+os.system("echo core > /proc/sys/kernel/core_pattern")
 
 cmd = "python generate_run_full.py %s %s" %(firm_id, firm_arch)
 os.system(cmd)
 sys_run_src = "firmadyne/scratch/%s/run_full.sh" %(firm_id)
-user_run_src = "FirmAFLNet_config/%s/user.sh" %firm_id
-if "mips" in firm_arch:
-	sys_src = "qemu_mode/DECAF_qemu_2.10/%s-softmmu/qemu-system-%s" %(firm_arch, firm_arch)
-	user_src = "user_mode/%s-linux-user/qemu-%s" %(firm_arch, firm_arch)
-else:
-	sys_src = "qemu_mode/DECAF_qemu_2.10/arm-softmmu/qemu-system-arm"
-	user_src = "user_mode/arm-linux-user/qemu-arm" 
+
+sys_src = "qemu_mode/SPY_qemu_8.2.91/build/qemu-system-%s" %(firm_arch)
 config_src = "FirmAFLNet_config/%s/FirmAFLNet_config" %(firm_id)
-test_src = "FirmAFLNet_config/%s/test.py" %(firm_id)
 keywords_src = "FirmAFLNet_config/%s/keywords" %(firm_id)
 afl_src= "FirmAFLNet_config/afl-fuzz-full"
 firmadyne_src = "firmadyne/firmadyne.config"
@@ -34,17 +27,13 @@ other_file2 =  "FirmAFLNet_config/vgabios-cirrus.bin"
 cmd_input = "mkdir image_%s/inputs" %firm_id
 seed_src = "FirmAFLNet_config/%s/seed" %(firm_id)
 start_src = "FirmAFLNet_config/start_full.py"
-
 dst = "image_%s/" %firm_id
 dst_input = "image_%s/inputs/" %firm_id
 
 cmd = []
 cmd.append("cp %s %s" %(sys_run_src, dst)) 
-cmd.append("cp %s %s" %(user_run_src, dst)) 
 cmd.append("cp %s %s" %(sys_src, dst)) 
-cmd.append("cp %s %safl-qemu-trace" %(user_src, dst)) 
 cmd.append("cp %s %s" %(config_src, dst)) 
-cmd.append("cp %s %s" %(test_src, dst)) 
 cmd.append("cp %s %s" %(keywords_src, dst)) 
 cmd.append("cp %s %s" %(afl_src, dst)) 
 cmd.append("cp %s %s" %(firmadyne_src, dst)) 
@@ -59,7 +48,6 @@ cmd.append("cp %s %s" %(start_src, dst))
 
 for i in range(0, len(cmd)):
 	os.system(cmd[i])
-
 
 if cmp(firm_id, "129780") == 0:
 	os.system("cp FirmAFLNet_config/missing_file/129780/net.conf image_129780/var/config/")
