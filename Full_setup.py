@@ -24,7 +24,7 @@ else:
 procinfo_src =  "FirmAFLNet_config/procinfo.ini"
 other_file1 =  "FirmAFLNet_config/efi-pcnet.rom"
 other_file2 =  "FirmAFLNet_config/vgabios-cirrus.bin"
-cmd_input = "mkdir image_%s/inputs" %firm_id
+cmd_input = "mkdir -p image_%s/inputs" %firm_id
 seed_src = "FirmAFLNet_config/%s/seed" %(firm_id)
 start_src = "FirmAFLNet_config/start_full.py"
 dst = "image_%s/" %firm_id
@@ -51,19 +51,19 @@ for i in range(0, len(cmd)):
 
 if cmp(firm_id, "129780") == 0:
 	os.system("cp FirmAFLNet_config/missing_file/129780/net.conf image_129780/var/config/")
-	os.system("mkdir image_129780/var/run/")
+	os.system("mkdir -p image_129780/var/run/")
 	os.system("cp FirmAFLNet_config/missing_file/129780/profile.ini image_129780/var/run/")
 	os.system("cp FirmAFLNet_config/missing_file/129780/video.ini image_129780/var/run/")
 elif cmp(firm_id, "129781") == 0:
 	os.system("cp FirmAFLNet_config/missing_file/129781/net.conf image_129781/var/config/")
 	os.system("cp FirmAFLNet_config/missing_file/129781/net.conf image_129781/var/config/net.conf_ori")
 elif cmp(firm_id, "10853") == 0:
-	os.system("mkdir image_10853/var/run/")
-	os.system("mkdir image_10853/var/etc/")
+	os.system("mkdir -p image_10853/var/run/")
+	os.system("mkdir -p image_10853/var/etc/")
 	os.system("cp FirmAFLNet_config/missing_file/10853/nvram.conf image_10853/var/etc/")
 	os.system("cp FirmAFLNet_config/missing_file/10853/rc.pid image_10853/var/run/")
 	os.system("cp FirmAFLNet_config/missing_file/10853/httpd.pid image_10853/var/run/")
 elif cmp(firm_id, "161161") == 0:
-	os.system("mkdir image_161161/tmp/etc/")
+	os.system("mkdir -p image_161161/tmp/etc/")
 	os.system("cp FirmAFLNet_config/missing_file/161161/nvram.conf image_161161/tmp/etc/")
 	os.system("cp FirmAFLNet_config/missing_file/161161/nvram_default_counter image_161161/tmp/etc/")
