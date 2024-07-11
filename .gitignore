@@ -39,3 +39,6 @@ qemu_mode/*/GNUmakefile
 qemu_mode/*/build/
 qemu_mode/*/*/build/
 __pycache__/
+
+firmadyne/
+image_*/
