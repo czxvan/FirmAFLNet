@@ -41,4 +41,5 @@ qemu_mode/*/*/build/
 __pycache__/
 
 firmadyne/
+FirmAE
 image_*/
