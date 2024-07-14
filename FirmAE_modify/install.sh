@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # postgresql
-sudo apt install -y postgresql
+sudo DEBIAN_FRONTEND=noninteractive apt install -y postgresql
 sudo /etc/init.d/postgresql restart
 sudo -u postgres bash -c "psql -c \"CREATE USER firmadyne WITH PASSWORD 'firmadyne';\""
 sudo -u postgres createdb -O firmadyne firmware
