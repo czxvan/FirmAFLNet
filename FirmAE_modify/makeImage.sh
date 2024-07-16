@@ -137,7 +137,7 @@ fi
 echo "----Unmounting QEMU Image----"
 sync
 umount "${IMAGE_DIR}"
-del_partition ${DEVICE}
+del_partition ${DEVICE:0:$((${#DEVICE}-2))}
 
 DEVICE=`add_partition ${IMAGE}`
 e2fsck -y ${DEVICE}
