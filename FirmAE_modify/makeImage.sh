@@ -110,6 +110,9 @@ do
     cp "${BINARY_PATH}" "${IMAGE_DIR}/firmadyne/${BINARY_NAME}"
     chmod a+x "${IMAGE_DIR}/firmadyne/${BINARY_NAME}"
 done
+cp $(get_agent ${ARCH}) ${IMAGE_DIR}/firmadyne/spy_agent
+chmod a+x "${IMAGE_DIR}/firmadyne/spy_agent"
+
 mknod -m 666 "${IMAGE_DIR}/firmadyne/ttyS1" c 4 65
 
 cp "${SCRIPT_DIR}/preInit.sh" "${IMAGE_DIR}/firmadyne/preInit.sh"

@@ -7,16 +7,26 @@ def generate_run_full(image_id):
 	file_src = open(script_src)
 	file_dst = open(script_dst, "w+")
 	for line in file_src.readlines():
-		if "Starting emulation of firmware..." in line:
-			file_dst.write("IP=$(cat ${WORKDIR}/ip)\n")
+		if "Error:" in line:
+			continue
+		elif "exit" in line:
+			file_dst.write("    source ../FirmAE/firmae.config\n")
+		elif "QEMU=" in line:
+			file_dst.write("QEMU=$(get_spy_qemu ${ARCHEND})\n")
+			file_dst.write("PLUGIN=$(get_spy_plugin ${ARCHEND})\n")
+			file_dst.write("FUZZ_DIR=$(get_fuzz_dir ${IID})\n")
+		elif "Starting emulation of firmware..." in line:
+			file_dst.write("IP=$(cat ${WORK_DIR}/ip)\n")
 			file_dst.write(line)
-			file_dst.write("../afl-fuzz -i ${WORK_DIR}/inputs -o ${WORK_DIR}/outputs -P HTTP -N ${IP} -m 4096M -QQ\n")
-			file_dst.write("    -d -q 3 -s 3  -R -W 5 -w 50000 -t 50000\n")
+			file_dst.write("../afl-fuzz -i ${FUZZ_DIR}/inputs -o ${FUZZ_DIR}/outputs -P HTTP -N ${IP} -m none -QQ\\\n")
+			file_dst.write("    -d -q 3 -s 3  -R -W 5 -w 50000 -t 50000  -x keywords \\\n")
 			file_dst.write("    ")
+		elif "-serial file:${WORK_DIR}/qemu.final.serial.log" in line:
+			file_dst.write(line.replace("WORK_DIR", "FUZZ_DIR"))
 		elif "-display none" in line:
 			file_dst.write(line)
-			file_dst.write("    -d plugin\n")
-			file_dst.write("    -plugin libaflspy.so")
+			file_dst.write("    -d plugin \\\n")
+			file_dst.write("    -plugin ${PLUGIN} \\\n")
 		else:
 			file_dst.write(line)
 	file_src.close()
