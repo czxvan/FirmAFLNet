@@ -3015,6 +3015,9 @@ EXP_ST void init_forkserver(char** argv) {
         FATAL("Unexpected response from the fork server: %s", (char*)&status);
     }
 
+    // Make sure everything is up.
+    printf("Waiting guest up...\n");
+    sleep(40);
     detect_agent();
     detect_target();
     restart_target(); // Use restart_target here to make sure restart script is OK.

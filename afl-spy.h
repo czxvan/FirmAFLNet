@@ -110,26 +110,20 @@ int send_test_alive_request() {
         }
         OKF("Test Alive script is %s", test_alive_script);
     }
-    static char* buf = NULL;
-    if (buf == NULL) {
-        buf = (char*)malloc(1024);
-        memset(buf, 0, 1024);
-        if (buf == NULL) {
+    static char* cmd = NULL;
+    if (cmd == NULL) {
+        cmd = (char*)malloc(1024);
+        memset(cmd, 0, 1024);
+        if (cmd == NULL) {
             FATAL("Unable to allocate memory");
         }
-        FILE *fd = fopen(test_alive_script, "r");
-        if (fd == NULL) {
-            FATAL("Unable to open %s", test_alive_script);
-        }
-        fread(buf, 1, 1024, fd);
-        fclose(fd);
-        
+        snprintf(cmd, 1024, "bash %s;", test_alive_script);
     }
-    int res = system(buf);
+    int res = system(cmd);
     static int count = 0;
     count++;
     if (res != 0) {
-      OKF("Test Alive timed out, res = %d, count = %d\n", res, count);
+      OKF("Test Alive timed out, res = %d, count = %d", res, count);
     }
     return res;
 }
@@ -143,23 +137,21 @@ int send_test_agent_request() {
         }
         OKF("Test Agent script is %s", test_agent_script);
     }
-    static char* buf = NULL;
-    if (buf == NULL) {
-        buf = (char*)malloc(1024);
-        memset(buf, 0, 1024);
-        if (buf == NULL) {
+    static char* cmd = NULL;
+    if (cmd == NULL) {
+        cmd = (char*)malloc(1024);
+        memset(cmd, 0, 1024);
+        if (cmd == NULL) {
             FATAL("Unable to allocate memory");
         }
-        FILE *fd = fopen(test_agent_script, "r");
-        if (fd == NULL) {
-            FATAL("Unable to open %s", test_agent_script);
-        }
-        fread(buf, 1, 1024, fd);
-        fclose(fd);
+        snprintf(cmd, 1024, "bash %s;", test_agent_script);
     }
-    int res = system(buf);
+    printf("cmd: %s\n", cmd);
+    int res = system(cmd);
     if (res != 0) {
-      OKF("Test Agent timed out\n");
+        OKF("Test Agent timed out, status:%d", res);
+    } else {
+        OKF("Test Agent success, status:%d", res);
     }
     return res;
 }
@@ -173,22 +165,16 @@ int send_restart_target_request() {
         }
         OKF("Restart Target script is %s", restart_target_script);
     }
-    static char* buf = NULL;
-    if (buf == NULL) {
-        buf = (char*)malloc(1024);
-        memset(buf, 0, 1024);
-        if (buf == NULL) {
+    static char* cmd = NULL;
+    if (cmd == NULL) {
+        cmd = (char*)malloc(1024);
+        memset(cmd, 0, 1024);
+        if (cmd == NULL) {
             FATAL("Unable to allocate memory");
         }
-        FILE *fd = fopen(restart_target_script, "r");
-        if (fd == NULL) {
-            FATAL("Unable to open %s", restart_target_script);
-        }
-        fread(buf, 1, 1024, fd);
-        fclose(fd);
-        
+        snprintf(cmd, 1024, "bash %s;", restart_target_script);
     }
-    int res = system(buf);
+    int res = system(cmd);
     if (res != 0) {
       FATAL("Fail to send restart target request to spy-agent: %d\n", res);
     }
@@ -209,7 +195,6 @@ static void read_target_ctx() {
       if (stop_soon) return;
       RPFATAL(res, "Unable to communicate with fork server (OOM?)");
     } else {
-      printf("\n"); // make it more tidy.
       OKF("target context is %08x", target_ctx);
       return;
     }
@@ -221,7 +206,6 @@ static void read_agent_ctx() {
       if (stop_soon) return;
       RPFATAL(res, "Unable to communicate with fork server (OOM?)");
     } else {
-      printf("\n"); // make it more tidy.
       OKF("agent context is %08x", agent_ctx);
       return;
     }
@@ -247,7 +231,8 @@ static void restart_target() {
     if (send_restart_target_request() != 0) {
         FATAL("Fail to send restart target request to spy-agent\n");
     }
-    read_target_ctx();
+    sleep(3);
+    detect_target();
 }
 
 static void log_trace_bits(int count) {
