@@ -4,6 +4,11 @@
 int main()
 {
     crow::SimpleApp app; 
+
+    CROW_ROUTE(app, "/")([](){
+        return "Hello, Spy Agent\n";
+    });
+
     CROW_ROUTE(app, "/ls")([](){
         int ret = system("ls");
         return "ok, status: " + std::to_string(ret) + "\n";
@@ -22,6 +27,5 @@ int main()
         return crow::response("ok, status: " + std::to_string(ret));
     });
 
-    //set the port, set the app to run on multiple threads, and run the app
     app.port(4817).run();
 }
