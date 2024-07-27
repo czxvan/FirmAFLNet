@@ -207,7 +207,7 @@ typedef struct {
     uint32_t exception_class;
 } ExceptionInfo;
 
-#define SYSTEM_STARTED_INDICATOR_PROCESS "/usr/bin/phosphor-host-state-manager"
+#define SYSTEM_STARTED_INDICATOR_PROCESS "agent"
 
 // Only used in qemu internal part
 #ifndef __AFL_SPY_C__

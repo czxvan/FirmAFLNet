@@ -3,12 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include <qemu-plugin-spy.h>
 #include "aflspy.h"
 
 QEMU_PLUGIN_EXPORT int qemu_plugin_version = QEMU_PLUGIN_VERSION;
 
 static const char *QEMU_MODE = NULL;
+static time_t start_time;
+static time_t current_time;
 
 void vcpu_insn_trans(qemu_plugin_id_t id,
                             CPUState *cpu, CPUArchState *env,
@@ -77,10 +80,6 @@ void vcpu_exception_spy(qemu_plugin_id_t id,
                             , info->syndrome
                             , info->target_el
                             , info->exception_class);
-        if (info->exception_class == 0x25) {
-            LOG_STATEMENT("ctx: %08x  Target Context reset from EXCEPTION 25\n"
-                          , info->ctx);
-        }
     }
 }
 
@@ -93,12 +92,12 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
     gboolean log_read = LOG_MASK(false) || QEMU_USER_MODE;
     gboolean log_write = LOG_MASK(false) || QEMU_USER_MODE;
     gboolean log_open = LOG_MASK(false) || QEMU_USER_MODE;
-    gboolean log_close = LOG_MASK(true) || QEMU_USER_MODE;
-    gboolean log_execve = LOG_MASK(false);
+    gboolean log_close = LOG_MASK(false) || QEMU_USER_MODE;
+    gboolean log_execve = LOG_MASK(true);
     gboolean log_clone = LOG_MASK(false);
-    gboolean log_send = LOG_MASK(true) || QEMU_USER_MODE;
-    gboolean log_sendto = LOG_MASK(true) || QEMU_USER_MODE;
-    gboolean log_sendmsg = LOG_MASK(true) || QEMU_USER_MODE;
+    gboolean log_send = LOG_MASK(false) || QEMU_USER_MODE;
+    gboolean log_sendto = LOG_MASK(false) || QEMU_USER_MODE;
+    gboolean log_sendmsg = LOG_MASK(false) || QEMU_USER_MODE;
     gboolean log_recv = LOG_MASK(false) || QEMU_USER_MODE;
     gboolean log_recvfrom = LOG_MASK(false) || QEMU_USER_MODE;
 
@@ -177,12 +176,13 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
         } break;
         case EXECVE: {
             // Use strstr instead of g_strcmp0 to wildcard match
-            if (!system_started &&
-                strstr(info->params.execve_params->filename, SYSTEM_STARTED_INDICATOR_PROCESS) != NULL)
+            if (!system_started 
+                && strstr(info->params.execve_params->filename, SYSTEM_STARTED_INDICATOR_PROCESS) != NULL)
             {
                 system_started = true;
                 afl_setup();
-                LOG_STATEMENT("System Started.\n");
+                time(&start_time);
+                LOG_STATEMENT("System Started in %ld.\n", start_time);
                 if (write(STATE_WRITE_FD, "RDY!", 4) != 4) {
                     LOG_ERROR("Failed to write RDY! to STATE_WRITE_FD\n");
                 } else {
@@ -190,6 +190,7 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
                 }
             }
             if (log_execve) {
+            // if (1) {
                 g_autofree gchar *log = g_strdup_printf(
                     "ctx: %08x  execve  %s\n"
                     , info->ctx
@@ -290,6 +291,7 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
         } break;
         case RECV: {
             if (log_recv) {
+            // if (1) {
                 g_autofree gchar *log = g_strdup_printf(
                     "ctx: %08x  recv %d bytes from %d, flags: %d\n"
                     , info->ctx
@@ -351,15 +353,27 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
         } break;
         case ACCEPT: {
             if (system_started) {
-                if (!agent_ctx) {
-                    set_agent_ctx(info->ctx);
-                } else if (!target_ctx && info->ctx != agent_ctx) {
-                    set_target_ctx(info->ctx);
-                } else if (target_ctx && info->ctx == agent_ctx) {
-                    target_ctx = 0;
+                static int have_skipped = 0;
+                if (!have_skipped) {
+                    time(&current_time);
+                    LOG_STATEMENT("current time is %ld\n", current_time);
+                    if (current_time - start_time > 15) {
+                        have_skipped = 1;
+                    }
+                }
+
+                if (have_skipped) {
+                    if (!agent_ctx) {
+                        set_agent_ctx(info->ctx);
+                    } else if (!target_ctx && info->ctx != agent_ctx) {
+                        set_target_ctx(info->ctx);
+                    } else if (target_ctx && info->ctx == agent_ctx) {
+                        target_ctx = 0;
+                    }
                 }
             }
             if (log_accept) {
+            // if (1) {
                 g_autofree gchar *log = g_strdup_printf(
                     "ctx: %08x  accept sockfd: %d, sock_addr: %08x, addr_len: %d\n"
                     , info->ctx

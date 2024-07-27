@@ -55,7 +55,7 @@
 #ifdef TARGET_ARM
 #define SPY_TARGET_ARM
 #elif defined(TARGET_MIPS)
-#define SPY_TARGET_ARM
+#define SPY_TARGET_MIPS
 #endif
 #include "plugin_spy/aflspy.h"
 #include "qemu/log.h"

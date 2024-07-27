@@ -3288,8 +3288,9 @@ static inline target_ulong SPY_getPC(CPUArchState *env)
 
 static inline target_ulong SPY_getPGD(CPUArchState *env)
 {
-    // return env->cp15.ttbr0_el[1]; // I think it's wrong, but firmafl use it.
-    return env->cp15.ttbr0_el[3];
+    // return env->cp15.ttbr0_el[1]; // good for R6300.
+    // return env->cp15.ttbr0_el[3]; // good for Openbmc.
+    return env->cp15.ttbr0_el[1] + env->cp15.ttbr0_el[3]; // good for both.
 }
 
 static inline target_ulong SPY_getSyscallNum(CPUArchState *env)
