@@ -357,7 +357,7 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
                 if (!have_skipped) {
                     time(&current_time);
                     LOG_STATEMENT("current time is %ld\n", current_time);
-                    if (current_time - start_time > 15) {
+                    if (current_time - start_time > 30) {
                         have_skipped = 1;
                     }
                 }
