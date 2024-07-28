@@ -1,0 +1,40 @@
+reach qemu_init_vcpu 1, process: 35969
+count: 100000, insn: e59f3028
+count: 200000, insn: e59d103c
+count: 300000, insn: 1a000009
+count: 400000, insn: eaffffbe
+count: 500000, insn: e1cd20dc
+count: 600000, insn: e59a327c
+count: 700000, insn: eb01e676
+count: 800000, insn: e5900080
+count: 900000, insn: e0a22002
+count: 1000000, insn: e1a01008
+count: 1100000, insn: e4c42001
+count: 1200000, insn: e59f3550
+count: 1300000, insn: 8a000004
+count: 1400000, insn: 0a000002
+[ERROR] SHM_ENV_VAR or SHM_ENV_VAR_SPY not set id_str: (null), id_str_spy: (null)
+System Started.
+[ERROR] Failed to write RDY! to STATE_WRITE_FD
+count: 1500000, insn: eb04252f
+count: 1600000, insn: ebfff92a
+Agent Context set to 81de8008
+[ERROR] Failed to write agent_ctx to STATE_WRITE_FD
+Target Context set to 8217c008
+[ERROR] Failed to write target_ctx to STATE_WRITE_FD
+ctx: 8217c008  accept sockfd: 6, sock_addr: 00000000, addr_len: 0
+ctx: 8217c008  sendmsg to 12 flags: 0
+ctx: 8217c008  close  fd: 12
+Target Context set to 8217c008
+[ERROR] Failed to write target_ctx to STATE_WRITE_FD
+ctx: 8217c008  accept sockfd: 6, sock_addr: 00000000, addr_len: 0
+ctx: 8217c008  sendmsg to 12 flags: 0
+ctx: 8217c008  close  fd: 12
+ctx: 8217c008  accept sockfd: 6, sock_addr: 00000000, addr_len: 0
+ctx: 8217c008  accept sockfd: 6, sock_addr: 00000000, addr_len: 0
+ctx: 8217c008  sendmsg to 12 flags: 0
+ctx: 8217c008  close  fd: 12
+ctx: 8217c008  accept sockfd: 6, sock_addr: 00000000, addr_len: 0
+ctx: 8217c008  accept sockfd: 6, sock_addr: 00000000, addr_len: 0
+ctx: 8217c008  sendmsg to 12 flags: 0
+ctx: 8217c008  close  fd: 12
