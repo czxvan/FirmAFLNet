@@ -1,7 +1,7 @@
 KERN=/workspaces/firmaflnet-repro/FirmAFLNet/firmware/bmc
 QEMUSPY=/workspaces/firmaflnet-repro/FirmAFLNet/qemu_mode/SPY_qemu_8.2.91
 AFLSPY=$QEMUSPY/plugin_spy
-
+export AFL_FAST_CAL=1
 # gdbserver 127.0.0.1:1234 \
 ../afl-fuzz -i ./inputs -o ./outputs -P HTTPS -N tcp://127.0.0.1/18084 -m 4096M -QQ \
      -d -q 3 -s 3 -E -R -W 5 -w 50000 -t 50000 \
