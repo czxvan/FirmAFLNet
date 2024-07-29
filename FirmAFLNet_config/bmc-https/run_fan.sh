@@ -14,4 +14,4 @@ export AFL_FAST_CAL=1
     -d plugin \
     -plugin $AFLSPY/build/libaflspy-arm.so \
     -D qemu_log.txt \
-    -nographic \
+    -nographic
