@@ -277,7 +277,7 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
             if (system_started && info->ctx == target_ctx) {
                 if (is_trace_enabled() && is_nextstep_zero()) {
                     set_nextstep(1);
-                    LOG_STATEMENT("Target SENDMSG\n");
+                    // LOG_STATEMENT("Target SENDMSG\n");
                 }
             }
             if (log_sendmsg) {
