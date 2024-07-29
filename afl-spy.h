@@ -231,7 +231,7 @@ static void restart_target() {
     if (send_restart_target_request() != 0) {
         FATAL("Fail to send restart target request to spy-agent\n");
     }
-    sleep(3);
+    sleep(1);
     detect_target();
 }
 

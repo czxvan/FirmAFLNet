@@ -34,7 +34,7 @@ void vcpu_tb_exec_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
     gboolean log_coverage_info = LOG_MASK(false);
     if(is_trace_enabled()) {
         if (info->ctx == target_ctx && info->pc < 0x01000000) {
-            count++;
+            // count++;
             afl_maybe_log(info->pc); // used to record code execution info
             if (log_tb_exec_spy) {
                 LOG_STATEMENT("ctx: %08x  tb_exec pc: %08x\n"
@@ -42,27 +42,28 @@ void vcpu_tb_exec_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
                                 , info->pc);
             }
         }
-    } else if (count > 0) {
-        LOG_STATEMENT("tb count: %ld\n", count);
-        count = 0;
+    } 
+    // else if (count > 0) {
+        // LOG_STATEMENT("tb count: %ld\n", count);
+        // count = 0;
 
-        // print coverage info
-        int count = 0;
-        for (int i = 0; i < MAP_SIZE; i++) {
-            if (coverage_info[i] > 0 || trace_bits[i] > 0) {
-                count++;
-            }
-        }
-        LOG_STATEMENT("coverage_info count: %d\n", count);
-        if (log_coverage_info) {
-            for (int i = 0; i < MAP_SIZE; i++) {
-                if (coverage_info[i] > 0 || trace_bits[i] > 0) {
-                    LOG_STATEMENT("coverage_info[%d]: %d trace_bits[%d]: %d \n", i, coverage_info[i], i, trace_bits[i]);
-                }
-            }
-        }
-        memset(coverage_info, 0, MAP_SIZE);
-    }
+        // // print coverage info
+        // int count = 0;
+        // for (int i = 0; i < MAP_SIZE; i++) {
+        //     if (coverage_info[i] > 0 || trace_bits[i] > 0) {
+        //         count++;
+        //     }
+        // }
+        // LOG_STATEMENT("coverage_info count: %d\n", count);
+        // if (log_coverage_info) {
+        //     for (int i = 0; i < MAP_SIZE; i++) {
+        //         if (coverage_info[i] > 0 || trace_bits[i] > 0) {
+        //             LOG_STATEMENT("coverage_info[%d]: %d trace_bits[%d]: %d \n", i, coverage_info[i], i, trace_bits[i]);
+        //         }
+        //     }
+        // }
+        // memset(coverage_info, 0, MAP_SIZE);
+    // }
 }
 
 void vcpu_exception_spy(qemu_plugin_id_t id,
@@ -104,7 +105,7 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
     gboolean log_socket = LOG_MASK(true) || QEMU_USER_MODE;
     gboolean log_bind = LOG_MASK(false) || QEMU_USER_MODE;
     gboolean log_listen = LOG_MASK(false) || QEMU_USER_MODE;
-    gboolean log_accept = LOG_MASK(true) || QEMU_USER_MODE;
+    gboolean log_accept = LOG_MASK(false) || QEMU_USER_MODE;
     gboolean log_default = LOG_MASK(false);
 
     switch (info->num) {
@@ -212,7 +213,7 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
             if (system_started && info->ctx == target_ctx) {
                 if (is_trace_enabled() && is_nextstep_zero()) {
                     set_nextstep(1);
-                    LOG_STATEMENT("Target SEND\n");
+                    // LOG_STATEMENT("Target SEND\n");
                 }
             }
             if (log_send) {
@@ -243,7 +244,7 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
             if (system_started && info->ctx == target_ctx) {
                 if (is_trace_enabled() && is_nextstep_zero()) {
                     set_nextstep(1);
-                    LOG_STATEMENT("Target SENDTO\n");
+                    // LOG_STATEMENT("Target SENDTO\n");
                 }
             }
             if (log_sendto) {
