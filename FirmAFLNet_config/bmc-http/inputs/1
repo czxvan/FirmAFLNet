@@ -1,3 +1,5 @@
-GET /data/1 HTTP/1.1
-Host: 127.0.0.1:18084
+GET / HTTP/1.1
+Host: 127.0.0.1:18080
+User-Agent: curl/7.81.0
+Accept: */*
 
