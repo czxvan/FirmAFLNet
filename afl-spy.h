@@ -69,13 +69,13 @@ EXP_ST void setup_shm_spy(void) {
 
     memset(cmd, 0, 1024);
     snprintf(cmd, 1024, "rm -rf %s", log_dir);
-    if (system(cmd) != 0) {
+    if (WEXITSTATUS(system(cmd)) != 0) {
         FATAL("Unable to remove log directory");
     }
 
     memset(cmd, 0, 1024);
     snprintf(cmd, 1024, "mkdir -p %s", log_dir);
-    if (system(cmd) != 0) {
+    if (WEXITSTATUS(system(cmd)) != 0) {
         FATAL("Unable to create log directory");
     }
 }
@@ -119,7 +119,7 @@ int send_test_alive_request() {
         }
         snprintf(cmd, 1024, "bash %s;", test_alive_script);
     }
-    int res = system(cmd);
+    int res = WEXITSTATUS(system(cmd));
     static int count = 0;
     count++;
     if (res != 0) {
@@ -147,7 +147,7 @@ int send_test_agent_request() {
         snprintf(cmd, 1024, "bash %s;", test_agent_script);
     }
     printf("cmd: %s\n", cmd);
-    int res = system(cmd);
+    int res = WEXITSTATUS(system(cmd));
     if (res != 0) {
         OKF("Test Agent timed out, status:%d", res);
     } else {
@@ -174,9 +174,9 @@ int send_restart_target_request() {
         }
         snprintf(cmd, 1024, "bash %s;", restart_target_script);
     }
-    int res = system(cmd);
+    int res = WEXITSTATUS(system(cmd));
     if (res != 0) {
-      FATAL("Fail to send restart target request to spy-agent: %d\n", res);
+      OKF("Fail to send restart target request to spy-agent, res = %d", res);
     }
     return res;
 }
@@ -213,25 +213,41 @@ static void read_agent_ctx() {
 
 static void detect_target() {
     int res = 0;
-    if ((res = send_test_alive_request())!= 0) {
-        FATAL("Fail to send test alive request to target: %d\n", res);
+    int count = 0;
+    while((res = send_test_alive_request()) != 0) {
+        count++;
+        sleep(3);
+        if (count == 10) {
+            FATAL("Fail to send test alive request to target: %d\n", res);
+        }
     }
     read_target_ctx();
+    sleep(2);
 }
 
 static void detect_agent() {
     int res = 0;
-    if ((res = send_test_agent_request())!= 0) {
-        FATAL("Fail to send test agent request to spy-agent: %d\n", res);
+    int count = 0;
+    while((res = send_test_agent_request()) != 0) {
+        count++;
+        sleep(3);
+        if (count == 10) {
+            FATAL("Fail to send test agent request to spy-agent: %d\n", res);
+        }
     }
     read_agent_ctx();
 }
 
 static void restart_target() {
-    if (send_restart_target_request() != 0) {
-        FATAL("Fail to send restart target request to spy-agent\n");
+    int res = 0;
+    int count = 0;
+    while((res = send_restart_target_request()) != 0) {
+        count++;
+        sleep(5);
+        if (count == 10) {
+            FATAL("Fail to send restart target request to spy-agent: %d\n", res);
+        }
     }
-    sleep(1);
     detect_target();
 }
 
