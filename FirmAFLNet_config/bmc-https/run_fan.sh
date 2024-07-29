@@ -10,7 +10,7 @@ export AFL_FAST_CAL=1
     -m 256 -machine romulus-bmc \
     -drive file=$KERN/obmc-phosphor-image-romulus.static.mtd,if=mtd,format=raw\
     -net nic \
-    -net user,hostfwd=:127.0.0.1:18080-:8080,hostfwd=:127.0.0.1:18084-:8084,hostfwd=:127.0.0.1:14817-:4817,hostname=qemu \
+    -net user,hostfwd=:127.0.0.1:18084-:8084,hostfwd=:127.0.0.1:14817-:4817,hostname=qemu \
     -d plugin \
     -plugin $AFLSPY/build/libaflspy-arm.so \
     -D qemu_log.txt \

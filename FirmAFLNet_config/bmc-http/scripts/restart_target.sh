@@ -4,7 +4,7 @@ CMD="pgrep $TARGET_PROC && (pgrep $TARGET_PROC | xargs kill -9); \
     systemctl reset-failed && \
     systemctl restart $TARGET_SERVICE"
 
-curl 127.0.0.1:14817/execute \
+curl 127.0.0.1:24817/execute \
     -d "{\"cmd\": \"$CMD\"}" > /dev/null 2>&1
     # --max-time 2
 
