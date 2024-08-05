@@ -43,3 +43,7 @@ __pycache__/
 firmadyne/
 FirmAE
 image_*/
+
+proxy/
+prepare.sh
+build.sh

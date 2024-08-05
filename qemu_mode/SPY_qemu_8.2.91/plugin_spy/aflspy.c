@@ -354,16 +354,7 @@ void vcpu_syscall_spy(qemu_plugin_id_t id, CPUState *cpu, CPUArchState *env, voi
         } break;
         case ACCEPT: {
             if (system_started) {
-                static int have_skipped = 0;
-                if (!have_skipped) {
-                    time(&current_time);
-                    LOG_STATEMENT("current time is %ld\n", current_time);
-                    if (current_time - start_time > 30) {
-                        have_skipped = 1;
-                    }
-                }
-
-                if (have_skipped) {
+                if (is_detect_started() || !is_afl_spying()) {
                     if (!agent_ctx) {
                         set_agent_ctx(info->ctx);
                     } else if (!target_ctx && info->ctx != agent_ctx) {

@@ -22,7 +22,9 @@ static SSL_CTX *ssl_ctx = NULL;
 SSL *ssl = NULL;
 u8 ssl_enabled = 0;
 
+#define SPY_SIGNAL_SIZE 3
 struct SpySignal {
+    u8 detect_started;
     u8 trace_enabled;
     u8 next_step;
 };
@@ -59,6 +61,7 @@ EXP_ST void setup_shm_spy(void) {
     spy_signal = shmat(shm_id_spy, NULL, 0);
 
     if (spy_signal == (void *)-1) PFATAL("shmat() failed");
+    memset(spy_signal, 0, SPY_SIGNAL_SIZE);
 
     log_dir = getenv("AFL_LOG_DIR");
     if (log_dir == NULL) {
@@ -144,7 +147,13 @@ int send_test_agent_request() {
         if (cmd == NULL) {
             FATAL("Unable to allocate memory");
         }
-        snprintf(cmd, 1024, "bash %s;", test_agent_script);
+        // snprintf(cmd, 1024, "bash %s;", test_agent_script);
+        FILE *fd = fopen(test_agent_script, "r");
+        if (fd == NULL) {
+            FATAL("Unable to open %s", test_agent_script);
+        }
+        fread(cmd, 1024, 1, fd);
+        fclose(fd);
     }
     printf("cmd: %s\n", cmd);
     int res = WEXITSTATUS(system(cmd));
@@ -189,6 +198,19 @@ static inline int test_agent() {
     return send_test_agent_request();
 }
 
+void clear_pipe_content(fd) {
+    int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+
+    char buffer[256];
+    int bytes_read;
+    while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0) {
+    }
+
+    flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
+}
+
 static void read_target_ctx() {
     int res = 0;
     if ((res = read(fsrv_st_fd, &target_ctx, 4)) != 4) {
@@ -212,6 +234,7 @@ static void read_agent_ctx() {
 }
 
 static void detect_target() {
+    clear_pipe_content(fsrv_st_fd);
     int res = 0;
     int count = 0;
     while((res = send_test_alive_request()) != 0) {

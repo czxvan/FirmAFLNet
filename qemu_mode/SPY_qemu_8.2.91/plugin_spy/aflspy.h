@@ -238,6 +238,7 @@ void dump_CPUState(CPUState *cpu);
 #define SHM_ENV_VAR_SPY       "__AFL_SHM_ID_SPY"
 
 struct SpySignal {
+    uint8_t detect_started;
     uint8_t trace_enabled;
     uint8_t next_step;
 };
@@ -294,7 +295,7 @@ static inline void afl_maybe_log(uint32_t cur_loc) {
 
     // debug coverage
     // if (cur_loc > 0x00400000 && cur_loc < 0x00800000) {
-        coverage_info[(cur_loc - 0x00400000) / 0x40] = 1;
+        // coverage_info[(cur_loc - 0x00400000) / 0x40] = 1;
         // trace_bits[(cur_loc - 0x00400000) / 0x40] = 1;
 
         // {
@@ -321,15 +322,21 @@ static inline void afl_maybe_log(uint32_t cur_loc) {
             trace_bits[cur_loc ^ prev_loc]++;
             prev_loc = cur_loc >> 1;
         }
-
-        
-    // }
-
 }
 
 static inline int is_trace_enabled(void) {
     MEM_BARRIER();
     return spy_signal && spy_signal->trace_enabled;
+}
+
+static inline int is_detect_started(void) {
+    MEM_BARRIER();
+    return spy_signal && spy_signal->detect_started;
+}
+
+static inline int get_detect_started(void) {
+    MEM_BARRIER();
+    return spy_signal && spy_signal->detect_started;
 }
 
 static inline int is_afl_spying(void) {

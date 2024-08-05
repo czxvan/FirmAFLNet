@@ -1066,10 +1066,10 @@ int send_over_network()
 
   if (ssl_enabled) {
       if (SSL_set_fd(ssl, sockfd) != 1) {
-        FATAL("Cannot associate SSL with socket");
+        BADF("Cannot associate SSL with socket");
       }
       if (SSL_connect(ssl) != 1) {
-        FATAL("Cannot establish SSL connection");
+        BADF("Cannot establish SSL connection");
       }
   }
 
@@ -3018,6 +3018,8 @@ EXP_ST void init_forkserver(char** argv) {
     // Make sure everything is up.
     printf("Waiting guest up...\n");
     sleep(40);
+    spy_signal->detect_started = 1;
+    printf("start detect...\n");
     detect_agent();
     detect_target();
     restart_target(); // Use restart_target here to make sure restart script is OK.
@@ -3398,7 +3400,8 @@ static u8 run_target(char** argv, u32 timeout) {
     // Make sure target is alive for next test.
     if (status != ST_TEST_ALIVE) restart_target();
 
-    if (status == ST_TEST_FAILED || (test_timeout && status == ST_TEST_TIMEOUT)) {
+    // if (status == ST_TEST_FAILED || (test_timeout && status == ST_TEST_TIMEOUT)) {
+    if (status != ST_TEST_ALIVE) {
       return FAULT_CRASH;
     } else if (test_timeout && status == ST_TEST_ALIVE) {
       return FAULT_TMOUT;
