@@ -1,8 +1,7 @@
 TARGET_PROC=bmcweb
 TARGET_SERVICE=bmcweb.service
 CMD="pgrep $TARGET_PROC && (pgrep $TARGET_PROC | xargs kill -9); \
-    systemctl reset-failed && \
-    systemctl restart $TARGET_SERVICE"
+    systemctl reset-failed"
 
 curl 127.0.0.1:14817/execute \
     -d "{\"cmd\": \"$CMD\"}" > /dev/null 2>&1
@@ -15,4 +14,4 @@ curl 127.0.0.1:14817/execute \
 #    otherwise the second request will influence the target_ctx, setting the value of target_ctx
 #    to context of spy-agent process wrongly, because the kill command have already killed the 
 #    target process and the target_ctx have been reset and ready to update.
-# (5)Put the comments below in the file to avoid imcomplete reading of the commands due to excessive comments
+# (5)Bmcweb will restart it automatically after it was killed, so we can just kill the process that don't respond.
