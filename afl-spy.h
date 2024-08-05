@@ -147,13 +147,7 @@ int send_test_agent_request() {
         if (cmd == NULL) {
             FATAL("Unable to allocate memory");
         }
-        // snprintf(cmd, 1024, "bash %s;", test_agent_script);
-        FILE *fd = fopen(test_agent_script, "r");
-        if (fd == NULL) {
-            FATAL("Unable to open %s", test_agent_script);
-        }
-        fread(cmd, 1024, 1, fd);
-        fclose(fd);
+        snprintf(cmd, 1024, "bash %s;", test_agent_script);
     }
     printf("cmd: %s\n", cmd);
     int res = WEXITSTATUS(system(cmd));
